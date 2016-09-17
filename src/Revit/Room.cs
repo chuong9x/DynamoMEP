@@ -16,7 +16,7 @@ namespace Revit.Elements
     /// MEP Rooms
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Room : Element, IGraphicItem
+    public class Pièce : Element, IGraphicItem
     {
         #region Internal Properties
 
@@ -56,13 +56,13 @@ namespace Revit.Elements
         /// Create from an existing Revit Element
         /// </summary>
         /// <param name="room">An existing Revit room</param>
-        private Room(DB.Architecture.Room room)
+        private Pièce(DB.Architecture.Room room)
         {
             SafeInit(() => InitRoom(room));
         }
 
 
-        private Room(
+        private Pièce(
             DB.Level level,
             DB.UV point)
         {
@@ -174,36 +174,36 @@ namespace Revit.Elements
         #region Public static constructors
 
         /// <summary>
-        /// Create a Room
-        /// based on a location and a level
+        /// Créer une pièce
+        /// à partir d'un niveau et d'un emplacement
         /// </summary>
-        /// <param name="point">Location point for the room</param>
-        /// <param name="level">Level of the room</param>
+        /// <param name="point">Emplacement de la pièce</param>
+        /// <param name="niveau">Niveau de la pièce</param>
         /// <returns></returns>
-        public static Room ByPointAndLevel(Point point, Level level)
+        public static Pièce ParPointEtNiveau(Point point, Level niveau)
         {
-            DB.Level revitLevel = level.InternalElement as DB.Level;
+            DB.Level revitLevel = niveau.InternalElement as DB.Level;
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Room(revitLevel, uv);
+            return new Pièce(revitLevel, uv);
         }
 
         /// <summary>
-        /// Create a Room
-        /// based on a location
+        /// Créer une pièce
+        /// à partir d'un emplacement
         /// </summary>
-        /// <param name="point">Location point for the room</param>
+        /// <param name="point">Emplacement de la pièce</param>
         /// <returns></returns>
-        public static Room ByPoint(Point point)
+        public static Pièce ParPoint(Point point)
         {
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
             DB.Level revitLevel = GetNearestLevel(revitPoint);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Room(revitLevel, uv);
+            return new Pièce(revitLevel, uv);
         }
 
         /// <summary>
@@ -235,18 +235,18 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Create a Room
-        /// from an existing Room
+        /// Créer un pièce
+        /// à partir d'une pièce existante
         /// </summary>
-        /// <param name="element">The origin element</param>
+        /// <param name="element">La pièce d'origine</param>
         /// <returns></returns>
-        public static Room FromElement(Element element)
+        public static Pièce DepuisExistant(Element element)
         {
             if (element != null)
             {
                 if (element.InternalElement.GetType() == typeof(DB.Architecture.Room))
                 {
-                    return new Room(element.InternalElement as DB.Architecture.Room);
+                    return new Pièce(element.InternalElement as DB.Architecture.Room);
                 }
                 else
                 {
@@ -264,26 +264,26 @@ namespace Revit.Elements
         #region public properties
 
         /// <summary>
-        /// Retrive a set of properties 
-        /// for the Room
+        /// Extraire les propriétés
+        /// de la pièce
         /// </summary>
-        /// <returns name="Name">The Room Name</returns>
-        /// <returns name="Number">The Room Number</returns>
+        /// <returns name="Nom">Le Nom de la pièce</returns>
+        /// <returns name="Numéro">Le Numéro de la pièce</returns>
         [MultiReturn(new[] { "Name", "Number" })]
-        public Dictionary<string, string> GetIdentificationData()
+        public Dictionary<string, string> DonnéesIdentification()
         {
             return new Dictionary<string, string>()
                 {
-                    {"Name",InternalRoom.Name},
-                    {"Number",InternalRoom.Number}
+                    {"Nom",InternalRoom.Name},
+                    {"Numéro",InternalRoom.Number}
                 };
         }
 
         /// <summary>
-        /// Determine if an element lies
-        /// within the volume of the Room
+        /// Determine si un element
+        /// est dans la pièce
         /// </summary>
-        public bool IsInRoom(Element element)
+        public bool EstDansLaPièce(Element element)
         {
             DB.FamilyInstance familyInstance = element.InternalElement as DB.FamilyInstance;
             if (familyInstance != null)
@@ -319,10 +319,10 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Return a grid of points in the room
+        /// Retourne une grille de points dans la pièce
         /// </summary>
-        /// <param name="step">Lenght between two points</param>
-        public List<Point> Grid(double step)
+        /// <param name="step">La distance entre deux points de la grille</param>
+        public List<Point> Grille(double step)
         {
             step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
             List<Point> grid = new List<Point>();
@@ -348,9 +348,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive room boundary elements
+        /// Retourne les limites de la pièce
         /// </summary>
-        public List<Element> BoundaryElements
+        public List<Element> ElementsLimites
         {
             get
             {
@@ -378,9 +378,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive the room associated level
+        /// Retourne le niveau associé à la pièce
         /// </summary>
-        public Level Level
+        public Level Niveau
         {
             get
             {
@@ -392,9 +392,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive the room location
+        /// Retourne l'emplacement de la pièce
         /// </summary>
-        public Point LocationPoint
+        public Point PointEmplacement
         {
             get
             {
@@ -478,9 +478,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive windows around the room
+        /// Retourne les fenêtres de la pièce
         /// </summary>
-        public List<FamilyInstance> Windows
+        public List<FamilyInstance> Fenêtres
         {
             get
             {
@@ -489,9 +489,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive Doors around the room
+        /// Retourne les portes de la pièce
         /// </summary>
-        public List<FamilyInstance> Doors
+        public List<FamilyInstance> Portes
         {
             get
             {
@@ -509,9 +509,9 @@ namespace Revit.Elements
         /// <param name="room"></param>
         /// <param name="isRevitOwned"></param>
         /// <returns></returns>
-        internal static Room FromExisting(DB.Architecture.Room room, bool isRevitOwned)
+        internal static Pièce FromExisting(DB.Architecture.Room room, bool isRevitOwned)
         {
-            return new Room(room)
+            return new Pièce(room)
             {
                 //IsRevitOwned = isRevitOwned
             };

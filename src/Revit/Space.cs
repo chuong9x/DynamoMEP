@@ -16,7 +16,7 @@ namespace Revit.Elements
     /// MEP Spaces
     /// </summary>
     [DynamoServices.RegisterForTrace]
-    public class Space : Element
+    public class Espace : Element
     {
         #region Internal Properties
 
@@ -48,13 +48,13 @@ namespace Revit.Elements
         /// Create from an existing Revit Element
         /// </summary>
         /// <param name="space">An existing Revit space</param>
-        private Space(DB.Mechanical.Space space)
+        private Espace(DB.Mechanical.Space space)
         {
             SafeInit(() => InitSpace(space));
         }
 
 
-        private Space(
+        private Espace(
             DB.Level level,
             DB.UV point)
         {
@@ -180,42 +180,42 @@ namespace Revit.Elements
         #region Public static constructors
 
         /// <summary>
-        /// Create a MEP Space
-        /// based on a location and a level
+        /// Créer un espace
+        /// à partir d'un niveau et d'un emplacement
         /// </summary>
-        /// <param name="point">Location point for the space</param>
-        /// <param name="level">Level of the space</param>
+        /// <param name="point">Emplacement de l'espace</param>
+        /// <param name="niveau">Niveau de l'espace</param>
         /// <returns></returns>
-        public static Space ByPointAndLevel(Point point, Level level)
+        public static Espace ParPointEtNiveau(Point point, Level niveau)
         {
             //Check if the level is in the document
-            if (level.InternalElement.Document != DocumentManager.Instance.CurrentDBDocument)
+            if (niveau.InternalElement.Document != DocumentManager.Instance.CurrentDBDocument)
             {
                 throw new ArgumentException("The level does not exist in the given document");
             }
 
-            DB.Level revitLevel = level.InternalElement as DB.Level;
+            DB.Level revitLevel = niveau.InternalElement as DB.Level;
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Space(revitLevel, uv);
+            return new Espace(revitLevel, uv);
         }
 
         /// <summary>
-        /// Create a `MEP Space
-        /// based on a location
+        /// Créer un espace
+        /// à partir d'un emplacement
         /// </summary>
-        /// <param name="point">Location point for the space</param>
+        /// <param name="point">Emplacement de l'espace</param>
         /// <returns></returns>
-        public static Space ByPoint(Point point)
+        public static Espace ParPoint(Point point)
         {
             DB.XYZ revitPoint = GeometryPrimitiveConverter.ToXyz(point);
             DB.Level revitLevel = GetNearestLevel(revitPoint);
 
             DB.UV uv = new DB.UV(revitPoint.X, revitPoint.Y);
 
-            return new Space(revitLevel, uv);
+            return new Espace(revitLevel, uv);
         }
 
         /// <summary>
@@ -247,16 +247,16 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Create a MEP Space
-        /// from an existing MEP Space
+        /// Créer un espace
+        /// à partir d'un espace existant
         /// </summary>
-        /// <param name="element">The origin element</param>
+        /// <param name="element">L'espace d'origine</param>
         /// <returns></returns>
-        public static Space FromElement(Element element)
+        public static Espace ParExistant(Element element)
         {
             if (element.InternalElement.GetType() == typeof(DB.Mechanical.Space))
             {
-                return new Space(element.InternalElement as DB.Mechanical.Space);
+                return new Espace(element.InternalElement as DB.Mechanical.Space);
             }
             else
             {
@@ -269,15 +269,15 @@ namespace Revit.Elements
         #region public properties
 
         /// <summary>
-        /// Retrive a set of properties 
-        /// for the Space
+        /// Extraire les propriétés
+        /// de l'espace
         /// </summary>
-        /// <returns name="Name">The MEPSpace Name</returns>
-        /// <returns name="Number">The MEPSpace Number</returns>
-        /// <returns name="Room Name">The associated room Name</returns>
-        /// <returns name="Room Number">The associated room Number</returns>
-        [MultiReturn(new[] { "Name", "Number", "Room Number", "Room Name" })]
-        public Dictionary<string, string> GetIdentificationData()
+        /// <returns name="Nom">Le Nom de l'espace</returns>
+        /// <returns name="Numéro">Le Numéro de l'espace</returns>
+        /// <returns name="Nom de la pièce">Le Nom de la pièce associée</returns>
+        /// <returns name="Numéro de la pièce">Le Numéro de la pièce associée</returns>
+        [MultiReturn(new[] { "Nom", "Numéro", "Numéro de la pièce", "Nom de la pièce" })]
+        public Dictionary<string, string> DonnéesIdentification()
         {
             string roomName = "Unoccupied";
             string roomNumber = "Unoccupied";
@@ -288,17 +288,17 @@ namespace Revit.Elements
             }
             return new Dictionary<string, string>()
                 {
-                    {"Name",InternalSpace.Name},
-                    {"Number",InternalSpace.Number},
-                    {"Room Name",roomName},
-                    {"Room Number",roomNumber}
+                    {"Nom",InternalSpace.Name},
+                    {"Numéro",InternalSpace.Number},
+                    {"Nom de la pièce",roomName},
+                    {"Numéro de la pièce",roomNumber}
                 };
         }
 
         /// <summary>
-        /// Retrive space boundary elements
+        /// Retourne les limites de l'espace
         /// </summary>
-        public List<Element> BoundaryElements
+        public List<Element> ElementsLimites
         {
             get
             {
@@ -326,9 +326,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive the space associated level
+        /// Retourne le niveau associé à l'espace
         /// </summary>
-        public Level Level
+        public Level Niveau
         {
             get
             {
@@ -340,9 +340,9 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Retrive the sapce location
+        /// Retourne l'emplacement de la pièce
         /// </summary>
-        public Point LocationPoint
+        public Point PointEmplacement
         {
             get
             {
@@ -352,10 +352,10 @@ namespace Revit.Elements
         }
 
         /// <summary>
-        /// Determine if an element lies
-        /// within the volume of the Space
+        /// Determine si un element
+        /// est dans l'espace
         /// </summary>
-        public bool IsInSpace(Element element)
+        public bool EstDansEspace(Element element)
         {
             DB.FamilyInstance familyInstance = element.InternalElement as DB.FamilyInstance;
             if (familyInstance != null)
@@ -392,10 +392,10 @@ namespace Revit.Elements
 
 
         /// <summary>
-        /// Return a grid of points in the space
+        /// Retourne une grille de points dans l'espace
         /// </summary>
-        /// <param name="step">Lenght between two points</param>
-        public List<Point> Grid(double step)
+        /// <param name="step">La distance entre deux points de la grille</param>
+        public List<Point> Grille(double step)
         {
             step = UnitConverter.DynamoToHostFactor(DB.UnitType.UT_Length) * step;
             List<Point> grid = new List<Point>();
@@ -431,9 +431,9 @@ namespace Revit.Elements
         /// <param name="space"></param>
         /// <param name="isRevitOwned"></param>
         /// <returns></returns>
-        internal static Space FromExisting(DB.Mechanical.Space space, bool isRevitOwned)
+        internal static Espace FromExisting(DB.Mechanical.Space space, bool isRevitOwned)
         {
-            return new Space(space)
+            return new Espace(space)
             {
                 //IsRevitOwned = isRevitOwned
             };
